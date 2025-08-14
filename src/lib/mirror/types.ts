@@ -37,6 +37,34 @@ export type Artifact = {
 	description?: string;
 };
 
+export type SocialPlatform = "email" | "discord" | "instagram" | "linkedin" | "youtube" | "tiktok";
+
+export type SocialProfile = {
+	platform: SocialPlatform;
+	handle: string;
+	profileUrl: string;
+	verified: boolean;
+	addedAt: number;
+};
+
+export type PersonalInfo = {
+	fullName?: string;
+	location?: string;
+	bio?: string;
+};
+
+export type UserProfile = {
+	twitterId?: string;
+	twitterHandle?: string;
+	twitterVerified: boolean;
+	personalInfo: PersonalInfo;
+	socialProfiles: SocialProfile[];
+	points: number;
+	trustScore: number;
+	createdAt: number;
+	updatedAt: number;
+};
+
 export type SoulSeed = {
 	alias: string;
 	vibe: "ethereal" | "zen" | "cyber";
@@ -46,6 +74,7 @@ export type SoulSeed = {
 	traits: TraitVector16;
 	artifacts: Artifact[];
 	memories: MemoryShard[]; // local only
+	profile?: UserProfile; // new: linked profile
 };
 
 export type Prompt = {
@@ -77,4 +106,6 @@ export type InsightCardData = {
 	title: string;
 	excerpt: string;
 	symbol: string;
-}; 
+};
+
+export type OnboardingStep = "twitter" | "personal" | "socials" | "questions" | "complete"; 

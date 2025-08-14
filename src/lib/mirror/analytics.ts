@@ -4,6 +4,10 @@ export type AnalyticEvent = {
   name:
     | "onboarding_started"
     | "onboarding_completed"
+    | "onboarding_twitter_completed"
+    | "onboarding_personal_completed"
+    | "onboarding_socials_completed"
+    | "onboarding_wizard_completed"
     | "daily_opened"
     | "prompt_answered"
     | "streak_day"

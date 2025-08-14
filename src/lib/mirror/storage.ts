@@ -37,6 +37,7 @@ export const StorageKeys = {
 	artifacts: "artifacts",
 	analyticsQueue: "analytics_queue",
 	onboarded: "onboarded",
+	userProfile: "user_profile",
 } as const;
 
 export function wipeAllMirrorLocal(): void {
