@@ -5,7 +5,7 @@ export default function SoulSeedCard({ seed }: { seed: SoulSeed }) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
   return (
-    <div className="rounded-lg border p-4">
+    <div className="rounded-lg border border-border p-4 bg-card text-card-foreground">
       <div className="text-sm opacity-70">Soul Seed</div>
       <div className="text-xl font-semibold">{seed.alias}</div>
       <div className="text-sm">Vibe: {seed.vibe}</div>
@@ -15,7 +15,7 @@ export default function SoulSeedCard({ seed }: { seed: SoulSeed }) {
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
         {top.map(([k, v]) => (
-          <div key={k} className="rounded border p-2 text-center">
+          <div key={k} className="rounded border border-border p-2 text-center bg-muted text-muted-foreground">
             <div>{k}</div>
             <div className="font-semibold">{v}</div>
           </div>

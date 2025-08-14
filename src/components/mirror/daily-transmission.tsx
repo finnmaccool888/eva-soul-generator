@@ -33,7 +33,7 @@ export default function DailyTransmission() {
   return (
     <div className="flex flex-col gap-4">
       <SoulSeedCard seed={seed} />
-      <div className="rounded-lg border p-4">
+      <div className="rounded-lg border border-border p-4 bg-card text-card-foreground">
         <div className="text-sm opacity-70">Eva asks</div>
         <div className="text-lg font-medium">{prompt.text}</div>
         <div className="mt-3">

@@ -14,7 +14,7 @@ export default function ResetControls() {
   }
   return (
     <div className="mt-6 text-right">
-      <button className="text-xs underline opacity-70" type="button" onClick={resetAll}>
+      <button className="text-xs underline opacity-70 text-muted-foreground hover:text-foreground" type="button" onClick={resetAll}>
         Reset Soul Seed (local only)
       </button>
     </div>

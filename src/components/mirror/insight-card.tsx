@@ -13,11 +13,11 @@ export default function InsightCard({ title, excerpt, symbol }: { title: string;
     }
   }
   return (
-    <div className="rounded-lg border p-4">
+    <div className="rounded-lg border border-border p-4 bg-card text-card-foreground">
       <div className="text-2xl">{symbol}</div>
       <div className="font-semibold">{title}</div>
       <div className="text-sm opacity-70">{excerpt}</div>
-      <button className="mt-2 rounded border px-3 py-1 text-sm" onClick={share} type="button">
+      <button className="mt-2 rounded border border-border px-3 py-1 text-sm hover:bg-accent hover:text-accent-foreground" onClick={share} type="button">
         Share
       </button>
     </div>
