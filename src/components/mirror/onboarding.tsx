@@ -56,7 +56,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4 overflow-y-auto">
       <AnimatePresence mode="wait">
         {step === "intro" && (
           <motion.div
