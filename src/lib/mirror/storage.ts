@@ -38,6 +38,7 @@ export const StorageKeys = {
 	analyticsQueue: "analytics_queue",
 	onboarded: "onboarded",
 	userProfile: "user_profile",
+	twitterAuth: "twitter_auth",
 } as const;
 
 export function wipeAllMirrorLocal(): void {

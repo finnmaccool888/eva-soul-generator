@@ -7,6 +7,7 @@ import { OnboardingStep, UserProfile, SocialPlatform } from "@/lib/mirror/types"
 import { loadProfile, saveProfile, addSocialProfile, calculatePoints, calculateTrustScore } from "@/lib/mirror/profile";
 import { Mail, MessageCircle, Instagram, Linkedin, Youtube, Video } from "lucide-react";
 import { track } from "@/lib/mirror/analytics";
+import { getTwitterAuth, mockTwitterLogin } from "@/lib/mirror/auth";
 
 const SOCIAL_CONFIGS: Array<{
   platform: SocialPlatform;
@@ -23,10 +24,22 @@ const SOCIAL_CONFIGS: Array<{
 ];
 
 export default function OnboardingWizard({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
-  const [step, setStep] = useState<OnboardingStep>("twitter");
-  const [profile, setProfile] = useState<UserProfile>(loadProfile());
+  const existingAuth = getTwitterAuth();
+  const [step, setStep] = useState<OnboardingStep>(existingAuth ? "personal" : "twitter");
+  const [profile, setProfile] = useState<UserProfile>(() => {
+    const p = loadProfile();
+    // If we have existing auth, apply it to profile
+    if (existingAuth) {
+      p.twitterId = existingAuth.twitterId;
+      p.twitterHandle = existingAuth.twitterHandle;
+      p.twitterVerified = true;
+      p.points = Math.max(p.points, 1000);
+      p.trustScore = Math.max(p.trustScore, 20);
+    }
+    return p;
+  });
   const [formData, setFormData] = useState({
-    twitterHandle: "",
+    twitterHandle: existingAuth?.twitterHandle || "",
     fullName: "",
     location: "",
     bio: "",
@@ -36,11 +49,14 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
   const stepIndex = ["twitter", "personal", "socials", "questions"].indexOf(step);
   const progressPct = Math.round(((stepIndex + 1) / 4) * 100);
 
-  function handleTwitterStep() {
-    // For now, just mock Twitter verification
+  async function handleTwitterStep() {
+    // Mock Twitter OAuth - replace with real OAuth later
+    const auth = await mockTwitterLogin(formData.twitterHandle);
+    
     const updated = { ...profile };
-    updated.twitterHandle = formData.twitterHandle;
-    updated.twitterVerified = true; // Mock verification
+    updated.twitterId = auth.twitterId;
+    updated.twitterHandle = auth.twitterHandle;
+    updated.twitterVerified = true;
     updated.points = 1000; // Twitter verification points
     updated.trustScore = 20;
     setProfile(updated);
@@ -130,25 +146,43 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
                 </p>
               </div>
               
-              <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Twitter OAuth coming soon. For now, enter your handle:
-                </p>
-                <input
-                  type="text"
-                  className="w-full rounded-md border border-border bg-background p-2 text-foreground placeholder:text-muted-foreground"
-                  placeholder="@yourhandle"
-                  value={formData.twitterHandle}
-                  onChange={(e) => setFormData({ ...formData, twitterHandle: e.target.value })}
-                />
-              </div>
+              {existingAuth ? (
+                <div className="rounded-lg border border-border bg-muted/50 p-4">
+                  <div className="flex items-center gap-3">
+                    {existingAuth.profileImage && (
+                      <img 
+                        src={existingAuth.profileImage} 
+                        alt={existingAuth.twitterHandle}
+                        className="h-12 w-12 rounded-full"
+                      />
+                    )}
+                    <div>
+                      <div className="font-medium">{existingAuth.twitterHandle}</div>
+                      <div className="text-sm text-muted-foreground">Already verified</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Twitter OAuth coming soon. For now, enter your handle:
+                  </p>
+                  <input
+                    type="text"
+                    className="w-full rounded-md border border-border bg-background p-2 text-foreground placeholder:text-muted-foreground"
+                    placeholder="@yourhandle"
+                    value={formData.twitterHandle}
+                    onChange={(e) => setFormData({ ...formData, twitterHandle: e.target.value })}
+                  />
+                </div>
+              )}
 
               <PrimaryButton 
-                onClick={handleTwitterStep}
-                disabled={!formData.twitterHandle.trim()}
+                onClick={existingAuth ? () => setStep("personal") : handleTwitterStep}
+                disabled={!existingAuth && !formData.twitterHandle.trim()}
                 className="w-full"
               >
-                Continue
+                {existingAuth ? "Continue" : "Verify Twitter"}
               </PrimaryButton>
             </div>
           )}
