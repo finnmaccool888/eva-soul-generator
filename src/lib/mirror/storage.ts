@@ -36,4 +36,9 @@ export const StorageKeys = {
 	lastDaily: "last_daily",
 	artifacts: "artifacts",
 	analyticsQueue: "analytics_queue",
-} as const; 
+	onboarded: "onboarded",
+} as const;
+
+export function wipeAllMirrorLocal(): void {
+	Object.values(StorageKeys).forEach((k) => remove(k));
+} 
