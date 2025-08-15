@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MirrorQuestion, EvaReaction, getEvaReaction, getDailyQuestions } from "@/lib/mirror/questions";
-import { feedSeed, loadSeed } from "@/lib/mirror/seed";
+import { feedSeed, loadSeed, saveSeed } from "@/lib/mirror/seed";
 import { track } from "@/lib/mirror/analytics";
+import { checkTraitUnlock, Trait } from "@/lib/mirror/traits-v2";
 import ChipInput from "./chip-input";
 import PrimaryButton from "../primary-button";
 import { Sparkles, Brain, Heart, Zap } from "lucide-react";
@@ -30,6 +31,7 @@ export default function EvaTransmission() {
     answer: string;
     reaction: EvaReaction | null;
   }>>([]);
+  const [unlockedTrait, setUnlockedTrait] = useState<Trait | null>(null);
   const [autoAdvanceTimer, setAutoAdvanceTimer] = useState<NodeJS.Timeout | null>(null);
 
   const currentQuestion = questions[currentIndex];
@@ -69,6 +71,60 @@ export default function EvaTransmission() {
     const reaction = getEvaReaction(userInput, currentQuestion.category);
     setEvaReaction(reaction);
 
+    // Check for trait unlock
+    const seed = loadSeed();
+    if (seed) {
+      const allAnswers = [
+        ...sessionData.map(d => ({
+          questionId: d.question.id,
+          category: d.question.category,
+          text: d.answer,
+          depth: d.question.difficulty
+        })),
+        {
+          questionId: currentQuestion.id,
+          category: currentQuestion.category,
+          text: userInput,
+          depth: currentQuestion.difficulty
+        }
+      ];
+
+      const newTraits = checkTraitUnlock(
+        {
+          questionId: currentQuestion.id,
+          category: currentQuestion.category,
+          text: userInput,
+          depth: currentQuestion.difficulty
+        },
+        allAnswers.slice(0, -1), // Don't include current answer twice
+        seed.earnedTraits || []
+      );
+
+      if (newTraits.length > 0) {
+        // Save the first unlocked trait
+        const trait = newTraits[0];
+        setUnlockedTrait(trait);
+        
+        // Update soul seed with new trait
+        const newEarnedTrait = {
+          traitId: trait.id,
+          earnedAt: Date.now(),
+          triggerAnswer: userInput,
+          questionId: currentQuestion.id,
+          strength: 50 // Start at 50 strength
+        };
+        
+        seed.earnedTraits = [...(seed.earnedTraits || []), newEarnedTrait];
+        saveSeed(seed);
+        
+        track("trait_unlocked", {
+          traitId: trait.id,
+          category: trait.category,
+          rarity: trait.rarity
+        });
+      }
+    }
+
     // Save to session
     setSessionData([...sessionData, {
       question: currentQuestion,
@@ -99,6 +155,7 @@ export default function EvaTransmission() {
       setCurrentIndex(currentIndex + 1);
       setUserInput("");
       setEvaReaction(null);
+      setUnlockedTrait(null);
       setStage("question");
     }
   }
@@ -310,15 +367,31 @@ export default function EvaTransmission() {
                   {evaReaction.response}
                 </p>
 
-                {evaReaction.unlock && (
+                {(unlockedTrait || evaReaction.unlock) && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-sm"
+                    className="space-y-2"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    Trait unlocked: {evaReaction.unlock}
+                    {unlockedTrait && (
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30">
+                        <span className="text-lg">{unlockedTrait.icon}</span>
+                        <div>
+                          <div className="font-medium">{unlockedTrait.name}</div>
+                          <div className="text-xs opacity-80">{unlockedTrait.description}</div>
+                        </div>
+                        <span className="text-xs bg-purple-500/20 px-2 py-1 rounded-full">
+                          {unlockedTrait.hashtag}
+                        </span>
+                      </div>
+                    )}
+                    {evaReaction.unlock && !unlockedTrait && (
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-sm">
+                        <Sparkles className="w-4 h-4" />
+                        Trait unlocked: {evaReaction.unlock}
+                      </div>
+                    )}
                   </motion.div>
                 )}
 
@@ -372,7 +445,7 @@ export default function EvaTransmission() {
               <p className="text-sm font-medium mb-2">Today&apos;s Insights:</p>
               <p className="text-xs text-muted-foreground">
                 {sessionData.length} questions answered<br />
-                {sessionData.filter(d => d.reaction?.unlock).length} new traits discovered
+                {sessionData.filter(d => d.reaction?.unlock).length + (unlockedTrait ? 1 : 0)} new traits discovered
               </p>
             </div>
 

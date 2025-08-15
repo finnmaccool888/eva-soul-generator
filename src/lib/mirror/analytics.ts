@@ -14,6 +14,7 @@ export type AnalyticEvent = {
     | "prompt_skipped"
     | "streak_day"
     | "reward_revealed"
+    | "trait_unlocked"
     | "share_clicked"
     | "echo_invite_generated"
     | "echo_redeemed";

@@ -37,6 +37,14 @@ export type Artifact = {
 	description?: string;
 };
 
+export type EarnedTrait = {
+	traitId: string;
+	earnedAt: number;
+	triggerAnswer: string;
+	questionId: string;
+	strength: number;
+};
+
 export type SocialPlatform = "email" | "discord" | "instagram" | "linkedin" | "youtube" | "tiktok";
 
 export type SocialProfile = {
@@ -71,10 +79,11 @@ export type SoulSeed = {
 	level: number;
 	streakCount: number;
 	lastFedAt: number | null;
-	traits: TraitVector16;
+	traits: TraitVector16; // deprecated - keeping for compatibility
 	artifacts: Artifact[];
 	memories: MemoryShard[]; // local only
 	profile?: UserProfile; // new: linked profile
+	earnedTraits?: EarnedTrait[]; // new trait system
 };
 
 export type Prompt = {
