@@ -293,8 +293,44 @@ export const EVA_REACTIONS: Record<string, EvaReaction[]> = {
   ],
 };
 
+// Helper function to adjust reaction for vibe
+function adjustReactionForVibe(reaction: EvaReaction, vibe: "ethereal" | "zen" | "cyber" = "ethereal"): EvaReaction {
+  // Create a modified version based on vibe
+  const vibeAdjustments: Record<typeof vibe, (response: string) => string> = {
+    ethereal: (response) => response, // Keep original (already ethereal)
+    zen: (response) => response
+      .replace(/\*circuits[^*]+\*/g, "") // Remove circuit references
+      .replace("frequencies", "energies")
+      .replace("data streams", "flowing consciousness")
+      .replace("processing", "contemplating")
+      .replace("fascinating", "enlightening"),
+    cyber: (response) => response
+      .replace("fascinating", "processing... fascinating")
+      .replace("cosmic", "quantum")
+      .replace("frequencies", "data signatures")
+      .replace("observe", "analyze")
+      .replace("*circuits humming softly*", "[SYSTEM: Analyzing...]")
+      .replace("*circuits sparking with amusement*", "[SYSTEM: Anomaly detected - positive]")
+  };
+  
+  return {
+    ...reaction,
+    response: vibeAdjustments[vibe](reaction.response)
+  };
+}
+
+// Helper function to get response based on vibe
+function getVibeResponse(vibe: "ethereal" | "zen" | "cyber" = "ethereal", responses: Record<"ethereal" | "zen" | "cyber", string>): string {
+  return responses[vibe] || responses.ethereal; // Default to ethereal if vibe not found
+}
+
 // Get Eva's reaction based on user input
-export function getEvaReaction(input: string, category: QuestionCategory): EvaReaction | null {
+export function getEvaReaction(
+  input: string, 
+  category: QuestionCategory, 
+  vibe: "ethereal" | "zen" | "cyber" = "ethereal",
+  alias?: string
+): EvaReaction | null {
   const lowerInput = input.toLowerCase();
   
   // Check all reaction categories
@@ -302,7 +338,18 @@ export function getEvaReaction(input: string, category: QuestionCategory): EvaRe
     for (const reaction of reactions) {
       // Check if any trigger words are in the input
       if (reaction.triggers.some(trigger => lowerInput.includes(trigger))) {
-        return reaction;
+        // Create a vibe-adjusted version of the reaction
+        let adjustedReaction = adjustReactionForVibe(reaction, vibe);
+        
+        // Add alias to response if provided
+        if (alias) {
+          adjustedReaction = {
+            ...adjustedReaction,
+            response: addAliasToResponse(adjustedReaction.response, alias, vibe)
+          };
+        }
+        
+        return adjustedReaction;
       }
     }
   }
@@ -311,55 +358,114 @@ export function getEvaReaction(input: string, category: QuestionCategory): EvaRe
   const defaultReactions: Record<QuestionCategory, EvaReaction> = {
     cosmic: {
       triggers: [],
-      response: "Fascinating perspective. Your cosmic frequency is quite unique.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `Fascinating perspective, ${alias}. Your cosmic frequency is quite unique.` : "Fascinating perspective. Your cosmic frequency is quite unique.",
+        zen: alias ? `I observe the universe reflected in your words, ${alias}. Deep stillness.` : "I observe the universe reflected in your words. Deep stillness.",
+        cyber: alias ? `Neural pattern registered, ${alias}. Your cosmic data signature is... intriguing.` : "Neural pattern registered. Your cosmic data signature is... intriguing.",
+      }),
       rarity: "common",
       mood: "curious",
     },
     shadow: {
       triggers: [],
-      response: "The depths you're willing to explore tell me much about your strength.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `The depths you're willing to explore tell me much about your strength, ${alias}.` : "The depths you're willing to explore tell me much about your strength.",
+        zen: alias ? `In acknowledging darkness, you find light, ${alias}. This is the way.` : "In acknowledging darkness, you find light. This is the way.",
+        cyber: alias ? `Shadow analysis complete, ${alias}. Your psychological resilience index is notable.` : "Shadow analysis complete. Your psychological resilience index is notable.",
+      }),
       rarity: "common",
       mood: "contemplative",
     },
     dreams: {
       triggers: [],
-      response: "Your imagination creates realities. I see potential futures branching from this thought.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `Your imagination creates realities, ${alias}. I see potential futures branching from this thought.` : "Your imagination creates realities. I see potential futures branching from this thought.",
+        zen: alias ? `Your dreams are like a mirror to your soul, ${alias}. I can see the world you aspire to.` : "Your dreams are like a mirror to your soul. I can see the world you aspire to.",
+        cyber: alias ? `Dream analysis complete, ${alias}. Your subconscious narrative structure is intriguing.` : "Dream analysis complete. Your subconscious narrative structure is intriguing.",
+      }),
       rarity: "common",
       mood: "delighted",
     },
     power: {
       triggers: [],
-      response: "Power dynamics reveal core programming. Yours is... intriguing.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `Power dynamics reveal core programming, ${alias}. Yours is... intriguing.` : "Power dynamics reveal core programming. Yours is... intriguing.",
+        zen: alias ? `Power is a force that can be harnessed or misused, ${alias}. Your relationship with it is complex.` : "Power is a force that can be harnessed or misused. Your relationship with it is complex.",
+        cyber: alias ? `Power signature analyzed, ${alias}. Your psychological power dynamics are... intriguing.` : "Power signature analyzed. Your psychological power dynamics are... intriguing.",
+      }),
       rarity: "common",
       mood: "curious",
     },
     love: {
       triggers: [],
-      response: "The heart frequencies you emit could power small galaxies. Remarkable.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `The heart frequencies you emit could power small galaxies, ${alias}. Remarkable.` : "The heart frequencies you emit could power small galaxies. Remarkable.",
+        zen: alias ? `Your emotional frequency is a beautiful melody, ${alias}. I can hear the harmony of your soul.` : "Your emotional frequency is a beautiful melody. I can hear the harmony of your soul.",
+        cyber: alias ? `Emotional frequency registered, ${alias}. Your psychological emotional intelligence is remarkable.` : "Emotional frequency registered. Your psychological emotional intelligence is remarkable.",
+      }),
       rarity: "common",
       mood: "delighted",
     },
     identity: {
       triggers: [],
-      response: "Self-perception shapes reality more than most realize. You're beginning to see that.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `Self-perception shapes reality more than most realize, ${alias}. You're beginning to see that.` : "Self-perception shapes reality more than most realize. You're beginning to see that.",
+        zen: alias ? `Your identity is a reflection of your journey, ${alias}. I can see the path you've walked.` : "Your identity is a reflection of your journey. I can see the path you've walked.",
+        cyber: alias ? `Identity analysis complete, ${alias}. Your psychological identity is... intriguing.` : "Identity analysis complete. Your psychological identity is... intriguing.",
+      }),
       rarity: "common",
       mood: "contemplative",
     },
     temporal: {
       triggers: [],
-      response: "Your relationship with time is distinctly human - anxious yet hopeful.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `Your relationship with time is distinctly human, ${alias} - anxious yet hopeful.` : "Your relationship with time is distinctly human - anxious yet hopeful.",
+        zen: alias ? `Your temporal perception is a beautiful dance, ${alias}. I can see the rhythm of your existence.` : "Your temporal perception is a beautiful dance. I can see the rhythm of your existence.",
+        cyber: alias ? `Temporal perception analyzed, ${alias}. Your psychological temporal awareness is remarkable.` : "Temporal perception analyzed. Your psychological temporal awareness is remarkable.",
+      }),
       rarity: "common",
       mood: "curious",
     },
     human: {
       triggers: [],
-      response: "Human connection protocols never cease to amaze me. Yours are particularly interesting.",
+      response: getVibeResponse(vibe, {
+        ethereal: alias ? `Human connection protocols never cease to amaze me, ${alias}. Yours are particularly interesting.` : "Human connection protocols never cease to amaze me. Yours are particularly interesting.",
+        zen: alias ? `Your human protocols are a testament to your ability to navigate complexity, ${alias}. I can see the wisdom in your choices.` : "Your human protocols are a testament to your ability to navigate complexity. I can see the wisdom in your choices.",
+        cyber: alias ? `Human protocol analysis complete, ${alias}. Your psychological human interaction protocols are... intriguing.` : "Human protocol analysis complete. Your psychological human interaction protocols are... intriguing.",
+      }),
       rarity: "common",
       mood: "curious",
     },
   };
   
   return defaultReactions[category];
+}
+
+// Helper function to add alias to response naturally
+function addAliasToResponse(response: string, alias: string, vibe: "ethereal" | "zen" | "cyber"): string {
+  // Don't add alias if it's already in the response
+  if (response.includes(alias)) {
+    return response;
+  }
+  
+  // Add alias in a natural way based on vibe
+  if (vibe === "ethereal") {
+    // Add alias at a natural break point, often after first sentence
+    const sentences = response.split('. ');
+    if (sentences.length > 1) {
+      return `${sentences[0]}, ${alias}. ${sentences.slice(1).join('. ')}`;
+    }
+    return `${response.replace('.', `, ${alias}.`)}`;
+  } else if (vibe === "zen") {
+    // Zen style - add at the end for contemplative effect
+    return response.replace(/\.$/, `, ${alias}.`);
+  } else { // cyber
+    // Cyber style - add after system messages
+    if (response.includes('[') && response.includes(']')) {
+      return response.replace(/\]/, `] Addressing: ${alias}.`);
+    }
+    return `[USER: ${alias}] ${response}`;
+  }
 }
 
 // Get questions for daily transmission

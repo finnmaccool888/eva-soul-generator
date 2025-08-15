@@ -1,4 +1,6 @@
 import { readJson, writeJson, StorageKeys } from "./storage";
+import { trackEvent as trackToSupabase } from "@/lib/supabase/services";
+import { getTwitterAuth } from "./auth";
 
 export type AnalyticEvent = {
   name:
@@ -29,5 +31,16 @@ export function track(name: AnalyticEvent["name"], props?: Record<string, unknow
   writeJson(StorageKeys.analyticsQueue, q);
   if (process.env.NODE_ENV !== "production") {
     console.log("analytics", evt);
+  }
+  
+  // Also track to Supabase if authenticated
+  try {
+    const auth = getTwitterAuth();
+    if (auth?.twitterHandle) {
+      // Fire and forget - don't await
+      trackToSupabase(null, name, props).catch(console.error);
+    }
+  } catch (error) {
+    // Ignore errors - analytics shouldn't break the app
   }
 } 

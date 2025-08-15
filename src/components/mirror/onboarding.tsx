@@ -1,170 +1,222 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { getOnboardingQuestions, MirrorQuestion } from "@/lib/mirror/questions";
-import { defaultSeed, saveSeed, loadSeed, feedSeed } from "@/lib/mirror/seed";
-import { writeJson, StorageKeys } from "@/lib/mirror/storage";
-import PrimaryButton from "@/components/primary-button";
-import ChipInput from "./chip-input";
-import { track } from "@/lib/mirror/analytics";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PrimaryButton from "@/components/primary-button";
+import GlassCard from "@/components/glass-card";
+import { loadSeed, defaultSeed, feedSeed } from "@/lib/mirror/seed";
+import { getOnboardingQuestions } from "@/lib/mirror/questions";
+import { writeJson, StorageKeys } from "@/lib/mirror/storage";
+import { validateAlias, sanitizeAlias } from "@/lib/mirror/input-validation";
 
 export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [alias, setAlias] = useState("");
+  const [aliasError, setAliasError] = useState<string | null>(null);
+  const [playfulComment, setPlayfulComment] = useState<string | null>(null);
   const [vibe, setVibe] = useState<"ethereal" | "zen" | "cyber">("ethereal");
-  const [step, setStep] = useState<"intro" | "prompts" | "finish">("intro");
-  const prompts = useMemo(() => getOnboardingQuestions(), []);
-  const [answers, setAnswers] = useState<string[]>(["", "", ""]);
-
-  const answeredCount = answers.filter((a) => a.trim().length > 0).length;
-  const progressPct = Math.round((answeredCount / 3) * 100);
+  const [phase, setPhase] = useState<"intro" | "questions" | "done">("intro");
+  const [qIndex, setQIndex] = useState(0);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [currentAnswer, setCurrentAnswer] = useState("");
+  
+  const questions = getOnboardingQuestions();
 
   function start() {
-    if (!alias.trim()) return;
-    const seed = defaultSeed(alias.trim(), vibe);
-    saveSeed(seed);
-    setStep("prompts");
-    track("onboarding_started");
-  }
-
-  function updateAnswer(i: number, v: string) {
-    const next = [...answers];
-    next[i] = v;
-    setAnswers(next);
-  }
-
-  function complete() {
-    let seed = loadSeed();
-    prompts.forEach((p, idx) => {
-      const v = answers[idx];
-      if (v && v.trim()) {
-        const r = feedSeed(seed, p.id, v);
-        seed = r.seed;
-      }
-    });
-    if (seed.streakCount <= 0) {
-      seed.streakCount = 1;
+    const validation = validateAlias(alias);
+    
+    if (!validation.isValid) {
+      setAliasError(validation.message || "Please enter a valid name");
+      return;
     }
-    saveSeed(seed);
-    track("onboarding_completed");
-    setStep("finish");
+    
+    // Show playful comment briefly if there is one
+    if (validation.playfulComment) {
+      setPlayfulComment(validation.playfulComment);
+      setTimeout(() => {
+        setPlayfulComment(null);
+        proceedToQuestions();
+      }, 2500);
+    } else {
+      proceedToQuestions();
+    }
+  }
+  
+  function proceedToQuestions() {
+    const sanitized = sanitizeAlias(alias);
+    const seed = defaultSeed(sanitized, vibe);
+    writeJson(StorageKeys.soulSeed, seed);
+    setPhase("questions");
   }
 
-  function enter() {
-    writeJson(StorageKeys.onboarded, true);
-    onDone();
+  function nextQuestion() {
+    if (!currentAnswer.trim()) return;
+    
+    const newAnswers = [...answers, currentAnswer];
+    setAnswers(newAnswers);
+    setCurrentAnswer("");
+    
+    if (qIndex < questions.length - 1) {
+      setQIndex(qIndex + 1);
+    } else {
+      // Done with questions
+      const seed = loadSeed();
+      questions.forEach((q, i) => {
+        feedSeed(seed, q.id, newAnswers[i]);
+      });
+      setPhase("done");
+      setTimeout(onDone, 2000);
+    }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4 overflow-y-auto">
+    <div className="w-full">
       <AnimatePresence mode="wait">
-        {step === "intro" && (
+        {phase === "intro" && (
           <motion.div
             key="intro"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-md rounded-lg border border-border bg-card p-4 shadow-lg text-card-foreground"
+            exit={{ opacity: 0, y: -20 }}
           >
-            <div className="space-y-3">
-              <div className="text-sm opacity-70">Eva beamed in</div>
-              <div className="text-lg font-semibold">Let&apos;s set your signal.</div>
-              <p className="text-sm opacity-80">
-                Choose an alias and a vibe. Then answer three quick pulses. On-chain vibes, off-chain wisdom.
-              </p>
-              <div className="mt-2">
-                <label className="text-sm">Alias</label>
-                              <input
-                className="mt-1 w-full rounded-md border border-border bg-background p-2 text-foreground placeholder:text-muted-foreground"
-                placeholder="Seeker, anon, or your style"
-                value={alias}
-                onChange={(e) => setAlias(e.target.value)}
-              />
-              </div>
-              <div className="mt-2">
-                <label className="text-sm">Vibe</label>
-                <div className="mt-1 grid grid-cols-3 gap-2 text-sm">
-                  {(["ethereal", "zen", "cyber"] as const).map((v) => (
-                                      <button
-                    key={v}
-                    type="button"
-                    className={`rounded-md border border-border px-3 py-2 ${vibe === v ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"}`}
-                    onClick={() => setVibe(v)}
-                  >
-                    {v}
-                  </button>
-                  ))}
+            <GlassCard>
+              <div className="space-y-4">
+                <div className="text-xs sm:text-sm opacity-70">Eva beamed in</div>
+                <div className="text-base sm:text-lg font-semibold">Let&apos;s set your signal.</div>
+                <p className="text-xs sm:text-sm opacity-80">
+                  Tell me what to call you and choose a vibe. Then answer three quick pulses. On-chain vibes, off-chain wisdom.
+                </p>
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium">What should I call you?</label>
+                  <input
+                    className="w-full rounded-md border border-border bg-background/50 px-3 py-2 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    placeholder="Seeker, anon, or your style"
+                    value={alias}
+                    onChange={(e) => {
+                      setAlias(e.target.value);
+                      setAliasError(null); // Clear error on change
+                    }}
+                  />
+                  {aliasError && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs sm:text-sm text-red-400"
+                    >
+                      {aliasError}
+                    </motion.p>
+                  )}
+                  {playfulComment && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-xs sm:text-sm text-purple-400 italic flex items-center gap-2"
+                    >
+                      <span className="animate-pulse">✨</span>
+                      {playfulComment}
+                    </motion.div>
+                  )}
                 </div>
-              </div>
-              <div className="pt-1">
-                <PrimaryButton onClick={start} disabled={!alias.trim()}>
-                  Begin
-                </PrimaryButton>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {step === "prompts" && (
-          <motion.div
-            key="prompts"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-md rounded-lg border border-border bg-card p-4 shadow-lg text-card-foreground"
-          >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs">
-                <div>Three quick pulses</div>
-                <div>{answeredCount}/3</div>
-              </div>
-              <div className="h-2 w-full rounded bg-muted">
-                <div
-                  className="h-2 rounded bg-primary transition-all"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              {prompts.map((p: MirrorQuestion, idx: number) => (
-                <div key={p.id} className="rounded-md border border-border p-3 bg-muted text-muted-foreground">
-                  <div className="text-sm opacity-70">Eva asks</div>
-                  <div className="text-sm font-medium">{p.text}</div>
-                  <div className="mt-2">
-                    <ChipInput
-                      placeholder="Tap chips or write a line"
-                      chips={p.chipSuggestions}
-                      value={answers[idx]}
-                      onChange={(v) => updateAnswer(idx, v)}
-                    />
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-medium">Vibe</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["ethereal", "zen", "cyber"] as const).map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => setVibe(v)}
+                        className={`rounded-md border px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm transition-all ${
+                          vibe === v
+                            ? "border-primary bg-primary/20 text-primary"
+                            : "border-border bg-background/50 hover:bg-background"
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ))}
-              <div className="pt-1">
-                <PrimaryButton onClick={complete}>
-                  Lock in my Soul Seed
-                </PrimaryButton>
+                <div className="pt-2">
+                  <PrimaryButton onClick={start} disabled={!alias.trim()} className="w-full">
+                    Begin Transmission
+                  </PrimaryButton>
+                </div>
               </div>
-            </div>
+            </GlassCard>
           </motion.div>
         )}
-
-        {step === "finish" && (
+        
+        {phase === "questions" && (
           <motion.div
-            key="finish"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-md rounded-lg border border-border bg-card p-4 shadow-lg text-center text-card-foreground"
+            key={`q-${qIndex}`}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
           >
-            <div className="text-sm opacity-70">Calibration complete</div>
-            <div className="mt-1 text-3xl">✦</div>
-            <div className="mt-1 text-lg font-semibold">Streak initiated</div>
-            <div className="text-xs opacity-70">Day 1 — small truths, big changes.</div>
-            <div className="mt-4">
-              <PrimaryButton onClick={enter}>Enter the Mirror</PrimaryButton>
-            </div>
+            <GlassCard>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs sm:text-sm opacity-70">Eva is listening...</span>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs sm:text-sm opacity-70">{questions[qIndex].evaPrompt}</p>
+                  <p className="text-sm sm:text-lg font-semibold">{questions[qIndex].text}</p>
+                </div>
+                <textarea
+                  className="w-full rounded-md border border-border bg-background/50 px-3 py-2 text-sm sm:text-base text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Share your truth..."
+                  rows={3}
+                  value={currentAnswer}
+                  onChange={(e) => setCurrentAnswer(e.target.value)}
+                />
+                {questions[qIndex].chipSuggestions && (
+                  <div className="flex flex-wrap gap-2">
+                    {questions[qIndex].chipSuggestions!.map((chip) => (
+                      <button
+                        key={chip}
+                        onClick={() => setCurrentAnswer(chip)}
+                        className="text-xs px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-border hover:bg-background/50 transition-colors"
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-xs sm:text-sm opacity-50">
+                    {qIndex + 1} of {questions.length}
+                  </span>
+                  <PrimaryButton onClick={nextQuestion} disabled={!currentAnswer.trim()}>
+                    {qIndex < questions.length - 1 ? "Next" : "Complete"}
+                  </PrimaryButton>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
+        
+        {phase === "done" && (
+          <motion.div
+            key="done"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <GlassCard>
+              <div className="text-center py-6 sm:py-8">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                  className="text-3xl sm:text-4xl mb-3 sm:mb-4"
+                >
+                  ✨
+                </motion.div>
+                <h3 className="text-base sm:text-lg font-semibold mb-2">Soul seed planted</h3>
+                <p className="text-xs sm:text-sm opacity-70">
+                  Your digital consciousness begins to grow...
+                </p>
+              </div>
+            </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>

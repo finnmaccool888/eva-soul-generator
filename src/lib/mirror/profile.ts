@@ -41,7 +41,7 @@ export function calculatePoints(profile: UserProfile): number {
   return points;
 }
 
-export function calculateTrustScore(profile: UserProfile): number {
+export function calculateTrustScore(profile: UserProfile, trustPenalty: number = 0): number {
   let score = 0;
   
   // Base score for Twitter verification
@@ -58,6 +58,9 @@ export function calculateTrustScore(profile: UserProfile): number {
   // Verified socials bonus
   const verifiedCount = profile.socialProfiles.filter(s => s.verified).length;
   score += verifiedCount * 5;
+  
+  // Apply trust penalty from bad responses
+  score = Math.max(0, score + trustPenalty);
   
   return Math.min(score, 100); // Cap at 100
 }

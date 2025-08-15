@@ -2,6 +2,8 @@ import { readJson, writeJson, StorageKeys } from "./storage";
 import { SoulSeed, MemoryShard } from "./types";
 import { createBaseTraits, applyTextToTraits } from "./traits";
 import { drawRandomArtifact } from "./artifacts";
+import { createOrUpdateUser, saveSoulSeedToSupabase } from "@/lib/supabase/services";
+import { getTwitterAuth } from "./auth";
 
 export function defaultSeed(alias: string = "Seeker", vibe: SoulSeed["vibe"] = "ethereal"): SoulSeed {
   return {
@@ -20,8 +22,23 @@ export function loadSeed(): SoulSeed {
   return readJson<SoulSeed>(StorageKeys.soulSeed, defaultSeed());
 }
 
-export function saveSeed(seed: SoulSeed): void {
+export async function saveSeed(seed: SoulSeed): Promise<void> {
+  // Save locally first
   writeJson(StorageKeys.soulSeed, seed);
+  
+  // Try to save to Supabase if authenticated
+  try {
+    const auth = getTwitterAuth();
+    if (auth?.twitterHandle) {
+      const { user } = await createOrUpdateUser(auth.twitterHandle, auth.twitterName);
+      if (user) {
+        await saveSoulSeedToSupabase(user.id, seed);
+      }
+    }
+  } catch (error) {
+    console.error('Error saving to Supabase:', error);
+    // Continue - local save already succeeded
+  }
 }
 
 function sameDay(a: number, b: number): boolean {
@@ -51,6 +68,7 @@ export function feedSeed(seed: SoulSeed, promptId: string, text: string): { seed
   // Reward
   const artifact = drawRandomArtifact();
   updated.artifacts = [...updated.artifacts, artifact];
+  // Don't await here to avoid blocking
   saveSeed(updated);
   return { seed: updated, shard };
 } 

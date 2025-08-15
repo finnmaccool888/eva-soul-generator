@@ -7,7 +7,7 @@ import { OnboardingStep, UserProfile, SocialPlatform } from "@/lib/mirror/types"
 import { loadProfile, saveProfile, addSocialProfile, calculatePoints, calculateTrustScore } from "@/lib/mirror/profile";
 import { Mail, MessageCircle, Instagram, Linkedin, Youtube, Video } from "lucide-react";
 import { track } from "@/lib/mirror/analytics";
-import { getTwitterAuth, mockTwitterLogin } from "@/lib/mirror/auth";
+import { getTwitterAuth } from "@/lib/mirror/auth";
 
 const SOCIAL_CONFIGS: Array<{
   platform: SocialPlatform;
@@ -25,7 +25,7 @@ const SOCIAL_CONFIGS: Array<{
 
 export default function OnboardingWizard({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
   const existingAuth = getTwitterAuth();
-  const [step, setStep] = useState<OnboardingStep>(existingAuth ? "personal" : "twitter");
+  const [step, setStep] = useState<OnboardingStep>("personal");
   const [profile, setProfile] = useState<UserProfile>(() => {
     const p = loadProfile();
     // If we have existing auth, apply it to profile
@@ -40,30 +40,16 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
   });
   const [formData, setFormData] = useState({
     twitterHandle: existingAuth?.twitterHandle || "",
-    fullName: "",
-    location: "",
-    bio: "",
+    fullName: profile.personalInfo?.fullName || "",
+    location: profile.personalInfo?.location || "",
+    bio: profile.personalInfo?.bio || "",
     socials: {} as Record<SocialPlatform, string>,
   });
 
-  const stepIndex = ["twitter", "personal", "socials", "questions"].indexOf(step);
-  const progressPct = Math.round(((stepIndex + 1) / 4) * 100);
+  const stepIndex = ["personal", "socials", "questions"].indexOf(step);
+  const progressPct = Math.round(((stepIndex + 1) / 3) * 100);
 
-  async function handleTwitterStep() {
-    // Mock Twitter OAuth - replace with real OAuth later
-    const auth = await mockTwitterLogin(formData.twitterHandle);
-    
-    const updated = { ...profile };
-    updated.twitterId = auth.twitterId;
-    updated.twitterHandle = auth.twitterHandle;
-    updated.twitterVerified = true;
-    updated.points = 1000; // Twitter verification points
-    updated.trustScore = 20;
-    setProfile(updated);
-    saveProfile(updated);
-    track("onboarding_twitter_completed");
-    setStep("personal");
-  }
+
 
   function handlePersonalStep() {
     const updated = { ...profile };
@@ -105,7 +91,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4 overflow-y-auto">
+    <div className="w-full">
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -113,13 +99,13 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg text-card-foreground"
+          className="w-full rounded-lg border border-border bg-card p-6 shadow-lg text-card-foreground"
         >
           {/* Progress bar */}
           {step !== "complete" && (
             <div className="mb-6">
               <div className="flex items-center justify-between text-xs mb-2">
-                <div>Step {stepIndex + 1} of 4</div>
+                <div>Step {stepIndex + 1} of 3</div>
                 <div>{profile.points.toLocaleString()} points</div>
               </div>
               <div className="h-2 w-full rounded bg-muted">
@@ -136,56 +122,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
             </div>
           )}
 
-          {/* Twitter Step */}
-          {step === "twitter" && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold">Connect Twitter</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Verify your Twitter account to establish your identity (+1,000 points)
-                </p>
-              </div>
-              
-              {existingAuth ? (
-                <div className="rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="flex items-center gap-3">
-                    {existingAuth.profileImage && (
-                      <img 
-                        src={existingAuth.profileImage} 
-                        alt={existingAuth.twitterHandle}
-                        className="h-12 w-12 rounded-full"
-                      />
-                    )}
-                    <div>
-                      <div className="font-medium">{existingAuth.twitterHandle}</div>
-                      <div className="text-sm text-muted-foreground">Already verified</div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Twitter OAuth coming soon. For now, enter your handle:
-                  </p>
-                  <input
-                    type="text"
-                    className="w-full rounded-md border border-border bg-background p-2 text-foreground placeholder:text-muted-foreground"
-                    placeholder="@yourhandle"
-                    value={formData.twitterHandle}
-                    onChange={(e) => setFormData({ ...formData, twitterHandle: e.target.value })}
-                  />
-                </div>
-              )}
 
-              <PrimaryButton 
-                onClick={existingAuth ? () => setStep("personal") : handleTwitterStep}
-                disabled={!existingAuth && !formData.twitterHandle.trim()}
-                className="w-full"
-              >
-                {existingAuth ? "Continue" : "Verify Twitter"}
-              </PrimaryButton>
-            </div>
-          )}
 
           {/* Personal Info Step */}
           {step === "personal" && (
@@ -293,7 +230,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
           {step === "questions" && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold">Soul Seed Complete!</h2>
+                <h2 className="text-lg font-semibold">Profile Complete!</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   You&apos;ve earned {profile.points.toLocaleString()} points
                 </p>
@@ -301,16 +238,16 @@ export default function OnboardingWizard({ onComplete }: { onComplete: (profile:
 
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="text-center">
-                  <div className="text-3xl mb-2">🌱</div>
+                  <div className="text-3xl mb-2">✨</div>
                   <div className="font-semibold">Trust Score: {profile.trustScore}/100</div>
                   <div className="text-sm text-muted-foreground mt-1">
-                    Ready to answer your baseline personality questions
+                    Next: Create your Soul Seed and begin your journey with Eva
                   </div>
                 </div>
               </div>
 
               <PrimaryButton onClick={handleComplete} className="w-full">
-                Continue to Questions
+                Continue to Soul Seed Creation
               </PrimaryButton>
             </div>
           )}

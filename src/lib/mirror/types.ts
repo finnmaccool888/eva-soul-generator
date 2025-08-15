@@ -71,6 +71,26 @@ export type UserProfile = {
 	trustScore: number;
 	createdAt: number;
 	updatedAt: number;
+	// New fields for human scoring
+	humanScore?: number; // Average human score (0-100)
+	totalQuestionsAnswered?: number;
+	sessionHistory?: Array<{
+		date: number;
+		questionsAnswered: number;
+		humanScore: number;
+		pointsEarned: number;
+	}>;
+	// OG status fields
+	isOG?: boolean;
+	ogPointsAwarded?: boolean;
+};
+
+export type AnalyzedMemory = {
+	quality: number;
+	category: "genuine" | "offensive" | "gibberish" | "test" | "spam";
+	sincerity: number;
+	flags: string[];
+	trustImpact: number;
 };
 
 export type SoulSeed = {
@@ -84,6 +104,9 @@ export type SoulSeed = {
 	memories: MemoryShard[]; // local only
 	profile?: UserProfile; // new: linked profile
 	earnedTraits?: EarnedTrait[]; // new trait system
+	offensiveCount?: number; // tracks offensive responses
+	trustPenalty?: number; // cumulative trust score penalty
+	analyzedResponses?: Record<string, AnalyzedMemory>; // analysis by memory ID
 };
 
 export type Prompt = {
@@ -117,4 +140,4 @@ export type InsightCardData = {
 	symbol: string;
 };
 
-export type OnboardingStep = "twitter" | "personal" | "socials" | "questions" | "complete"; 
+export type OnboardingStep = "personal" | "socials" | "questions" | "complete"; 
