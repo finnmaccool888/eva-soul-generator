@@ -79,6 +79,12 @@ export type UserProfile = {
 		questionsAnswered: number;
 		humanScore: number;
 		pointsEarned: number;
+		sessionData?: Array<{
+			questionId: string;
+			questionText: string;
+			answer: string;
+			editedAt?: number; // Track when answer was last edited
+		}>;
 	}>;
 	// OG status fields
 	isOG?: boolean;

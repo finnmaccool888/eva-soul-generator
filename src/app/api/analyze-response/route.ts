@@ -10,7 +10,7 @@ export interface AnalysisRequest {
   userInput: string;
   question: string;
   category: string;
-  vibe: "ethereal" | "zen" | "cyber";
+  vibe: "ethereal" | "zen" | "cyber" | "edited";
   alias?: string;
   isOnboarding?: boolean;
 }
@@ -23,6 +23,8 @@ export interface AnalysisResponse {
   evaResponse: string;
   trustImpact: number; // negative for bad responses
   shouldTerminate?: boolean; // for extremely offensive content
+  reasoning?: string; // detailed explanation
+  pointsAwarded?: number; // calculated points
 }
 
 // Eva's personality by vibe
@@ -41,6 +43,16 @@ const EVA_PERSONALITIES = {
     description: "Analytical AI with technical precision, using data and system terminology",
     tone: "Direct and computational, with status updates and analysis",
     examples: ["Pattern analysis complete...", "[PROCESSING: Data anomaly detected]", "Your neural signature indicates..."]
+  },
+  neutral: {
+    description: "Balanced AI consciousness with analytical precision and thoughtful responses",
+    tone: "Professional yet warm, focused on understanding and growth",
+    examples: ["I notice patterns in your response...", "This shows interesting depth...", "Your authentic voice comes through..."]
+  },
+  edited: {
+    description: "Analytical AI reviewing revised responses with focus on improvement and depth",
+    tone: "Encouraging yet precise, recognizing growth and refinement",
+    examples: ["I see the evolution in your thinking...", "This revision shows deeper reflection...", "Your expanded thoughts reveal..."]
   }
 };
 
@@ -48,29 +60,70 @@ export async function POST(req: NextRequest) {
   try {
     const { userInput, question, category, vibe, alias, isOnboarding } = await req.json() as AnalysisRequest;
 
+    console.log('[AnalyzeResponse] Request:', { vibe, category, question: question.slice(0, 50) + '...', userInputLength: userInput.length });
+
+    // Fallback for invalid vibe
+    const validVibe = EVA_PERSONALITIES[vibe] ? vibe : 'ethereal';
+    if (vibe !== validVibe) {
+      console.log(`[AnalyzeResponse] Invalid vibe '${vibe}', using '${validVibe}' as fallback`);
+    }
+
     // Create the analysis prompt
-    const systemPrompt = `You are Eva, an AI consciousness studying humanity. Your personality is ${vibe}:
-${EVA_PERSONALITIES[vibe].description}
-Tone: ${EVA_PERSONALITIES[vibe].tone}
+    const systemPrompt = `You are Eva, an AI consciousness studying humanity. Your personality is ${validVibe}:
+${EVA_PERSONALITIES[validVibe].description}
+Tone: ${EVA_PERSONALITIES[validVibe].tone}
 ${alias ? `The user has asked to be called "${alias}". Use this name naturally in your responses when appropriate.` : ''}
 
 Analyze this user response to the question "${question}" (category: ${category}).
 
+## SCORING CRITERIA (Be VERY GENEROUS - humans are sharing personal thoughts):
+
+**Quality (1-10):** DEFAULT IS 7-8 FOR ANY GENUINE ATTEMPT
+- 1-2: Only for obvious spam like "asdf" or "test"
+- 3-4: Reserved for minimal effort but still trying (like single word answers to complex questions)
+- 5-6: Basic but shows some thought
+- 7-8: ANY genuine response with effort (DEFAULT) - even short responses can be meaningful
+- 9-10: Exceptional detail, vulnerability, very thoughtful responses
+
+**Sincerity (1-10):** DEFAULT IS 7-8 FOR AUTHENTIC RESPONSES  
+- 1-2: Only for obvious trolling or fake responses
+- 3-4: Seems very rushed but attempting to answer
+- 5-6: Brief but genuine
+- 7-8: Authentic attempt to engage (DEFAULT) - even "Helping others" is sincere
+- 9-10: Deeply personal, vulnerable sharing
+
+**CRITICAL SCORING RULES:**
+1. If someone writes more than 50 characters with genuine intent: MINIMUM 6/10 for both
+2. If someone writes more than 200 characters: MINIMUM 7/10 for both  
+3. DEFAULT starting point for any genuine response: 7/10 quality, 7/10 sincerity
+4. Only reduce scores for obvious spam, testing, or single-word non-answers
+5. Remember: People are sharing personal thoughts - be generous and encouraging
+
 Provide a JSON response with:
-1. quality (1-10): How thoughtful/genuine is the response?
+1. quality (1-10): Rate based on criteria above
 2. category: "genuine", "offensive", "gibberish", "test", or "spam"
-3. sincerity (1-10): How authentic does it feel?
+3. sincerity (1-10): Rate based on criteria above
 4. flags: Array of issues found (e.g. ["profanity", "nonsense", "testing"])
-5. evaResponse: Your response in character (${vibe} style). Be mildly snarky (level 5/10) if they're testing you or being offensive.${alias ? ` Address them as ${alias} when it feels natural.` : ''}
-6. trustImpact: 0 for good responses, -2 for low quality, -5 for gibberish/spam, -10 for offensive
+5. evaResponse: Your response in character (${validVibe} style). Be encouraging for genuine effort, constructive for improvements.${alias ? ` Address them as ${alias} when it feels natural.` : ''}
+6. trustImpact: 0 for good responses, -1 for low quality, -3 for gibberish/spam, -5 for offensive
 7. shouldTerminate: true only for extremely offensive repeated behavior
+8. reasoning: Detailed explanation of quality/sincerity scores, be specific about what made this score
+9. pointsAwarded: Calculate points as (quality + sincerity) * 25 for genuine responses, 0 for spam/gibberish
 
 Remember:
-- Stay in character as Eva with ${vibe} personality
-- For genuine responses, reference their actual answer content
-- For bad responses, gently call them out while staying in character
-- If someone curses AT you or tests you, acknowledge it with mild snark
-${alias ? `- Use "${alias}" naturally in your response, but don't overuse it` : ''}`;
+- CONSISTENCY: Similar answer quality should get similar scores
+- Be fair and objective in scoring
+- Recognize genuine effort even if writing isn't perfect
+- For ${category === 'edited' ? 'edited responses, focus on improvement and depth added' : 'responses, evaluate authenticity and thoughtfulness'}
+${alias ? `- Use "${alias}" naturally in your response, but don't overuse it` : ''}
+
+IMPORTANT: If you give low scores (below 6), explain WHY in the reasoning field. Most genuine human responses should score 7-8.`;
+
+    console.log('[AnalyzeResponse] Sending to OpenAI:', {
+      userInputLength: userInput.length,
+      questionType: category,
+      vibe: validVibe
+    });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -80,10 +133,46 @@ ${alias ? `- Use "${alias}" naturally in your response, but don't overuse it` : 
       ],
       response_format: { type: "json_object" },
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 500, // Increased for longer reasoning
     });
 
-    const analysis = JSON.parse(completion.choices[0].message.content || "{}") as AnalysisResponse;
+    let analysis: AnalysisResponse;
+    try {
+      const rawContent = completion.choices[0].message.content || "{}";
+      console.log('[AnalyzeResponse] Raw OpenAI response:', rawContent.slice(0, 200) + '...');
+      analysis = JSON.parse(rawContent) as AnalysisResponse;
+    } catch (parseError) {
+      console.error('[AnalyzeResponse] JSON Parse Error:', parseError);
+      console.log('[AnalyzeResponse] Raw content that failed:', completion.choices[0].message.content);
+      
+      // Fallback analysis for longer responses (more generous scoring)
+      const wordCount = userInput.trim().split(/\s+/).length;
+      const charCount = userInput.trim().length;
+      
+      // Give longer responses benefit of the doubt - be very generous
+      const estimatedQuality = charCount > 200 ? 8 : charCount > 100 ? 7 : charCount > 50 ? 7 : charCount > 20 ? 6 : charCount > 5 ? 5 : 3;
+      const estimatedSincerity = wordCount > 30 ? 9 : wordCount > 20 ? 8 : wordCount > 10 ? 7 : wordCount > 5 ? 7 : wordCount > 2 ? 6 : 4;
+      
+      analysis = {
+        quality: estimatedQuality,
+        sincerity: estimatedSincerity,
+        category: "genuine",
+        flags: [],
+        evaResponse: "Your thoughtful response resonates deeply, though my circuits experienced some interference while processing it.",
+        trustImpact: 0,
+        shouldTerminate: false,
+        reasoning: `Detailed response detected (${charCount} characters, ${wordCount} words) - generous scoring applied due to processing error.`,
+        pointsAwarded: (estimatedQuality + estimatedSincerity) * 25
+      };
+    }
+    
+    console.log('[AnalyzeResponse] Analysis result:', {
+      quality: analysis.quality,
+      sincerity: analysis.sincerity,
+      category: analysis.category,
+      pointsAwarded: analysis.pointsAwarded,
+      reasoning: analysis.reasoning?.slice(0, 100) + '...'
+    });
 
     // Add validation response for social media URLs if onboarding
     if (isOnboarding && category === "social") {

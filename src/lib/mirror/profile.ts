@@ -20,25 +20,34 @@ export function loadProfile(): UserProfile {
 }
 
 export function saveProfile(profile: UserProfile): void {
-  profile.updatedAt = Date.now();
   writeJson(StorageKeys.userProfile, profile);
 }
 
+// NEW UNIFIED POINTS CALCULATION - matches leaderboard logic
+export function calculateTotalPoints(profile: UserProfile): number {
+  let totalPoints = 0;
+  
+  // Base verification points (for being authenticated)
+  totalPoints += 1000;
+  
+  // OG bonus points
+  if (profile.isOG) {
+    totalPoints += 10000;
+  }
+  
+  // Points from session history
+  if (profile.sessionHistory) {
+    totalPoints += profile.sessionHistory.reduce((sum: number, session: any) => 
+      sum + (session.pointsEarned || 0), 0);
+  }
+  
+  return totalPoints;
+}
+
+// LEGACY FUNCTION - keep for backward compatibility but deprecate
 export function calculatePoints(profile: UserProfile): number {
-  let points = 0;
-  
-  // Twitter verification
-  if (profile.twitterVerified) points += POINTS_PER_SOCIAL;
-  
-  // Personal info completion
-  const personalFields = [profile.personalInfo.fullName, profile.personalInfo.location, profile.personalInfo.bio];
-  const filledFields = personalFields.filter(f => f && f.trim().length > 0).length;
-  points += filledFields * 333; // ~1000 points total for all personal info
-  
-  // Social profiles
-  points += profile.socialProfiles.length * POINTS_PER_SOCIAL;
-  
-  return points;
+  // Use the new unified calculation instead
+  return calculateTotalPoints(profile);
 }
 
 export function calculateTrustScore(profile: UserProfile, trustPenalty: number = 0): number {
@@ -60,9 +69,17 @@ export function calculateTrustScore(profile: UserProfile, trustPenalty: number =
   score += verifiedCount * 5;
   
   // Apply trust penalty from bad responses
-  score = Math.max(0, score + trustPenalty);
+  score = Math.max(0, score - trustPenalty);
   
   return Math.min(score, 100); // Cap at 100
+}
+
+// NEW: Update profile with recalculated points
+export function updateProfilePoints(profile: UserProfile): UserProfile {
+  const updated = { ...profile };
+  updated.points = calculateTotalPoints(updated);
+  updated.updatedAt = Date.now();
+  return updated;
 }
 
 export function addSocialProfile(
@@ -85,8 +102,8 @@ export function addSocialProfile(
     addedAt: Date.now(),
   });
   
-  // Recalculate points and trust score
-  updated.points = calculatePoints(updated);
+  // Recalculate points and trust score using new system
+  updated.points = calculateTotalPoints(updated);
   updated.trustScore = calculateTrustScore(updated);
   
   return updated;
@@ -96,19 +113,19 @@ export function generateProfileUrl(platform: SocialPlatform, handle: string): st
   const cleanHandle = handle.replace(/^@/, '');
   
   switch (platform) {
-    case "email":
-      return `mailto:${handle}`;
-    case "discord":
+    case 'email':
+      return `mailto:${cleanHandle}`;
+    case 'discord':
       return `https://discord.com/users/${cleanHandle}`;
-    case "instagram":
+    case 'instagram':
       return `https://instagram.com/${cleanHandle}`;
-    case "linkedin":
+    case 'linkedin':
       return `https://linkedin.com/in/${cleanHandle}`;
-    case "youtube":
+    case 'youtube':
       return `https://youtube.com/@${cleanHandle}`;
-    case "tiktok":
+    case 'tiktok':
       return `https://tiktok.com/@${cleanHandle}`;
     default:
-      return "";
+      return '';
   }
 } 
