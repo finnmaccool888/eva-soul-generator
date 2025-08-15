@@ -164,7 +164,7 @@ export default function Stake() {
                   onChange={(e) => setWalletAddress(e.target.value)}
                   className="!border-[#FF007A]/20 focus:!border-[#FF007A] focus:!ring-2 focus:!ring-[#FF007A]/20 focus:!ring-offset-0 focus:!outline-none bg-white/90 backdrop-blur-sm text-[#48333D] placeholder:text-[#48333D]/60"
                 />
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-orange-600 text-sm">{error}</p>}
                 <Button
                   onClick={handleCheckBalance}
                   disabled={isLoading}
@@ -193,7 +193,7 @@ export default function Stake() {
                         className={
                           stakingInfo.hasMinimumStake
                             ? "text-green-600"
-                            : "text-red-600"
+                            : "text-orange-600"
                         }
                       >
                         {stakingInfo.hasMinimumStake ? "✓ Met" : "✗ Not Met"}
@@ -205,7 +205,7 @@ export default function Stake() {
                         className={
                           stakingInfo.optimalStake
                             ? "text-green-600"
-                            : "text-red-600"
+                            : "text-orange-600"
                         }
                       >
                         {stakingInfo.optimalStake

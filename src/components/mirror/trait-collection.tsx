@@ -40,7 +40,7 @@ export default function TraitCollection() {
                 className={`
                   rounded-lg p-3 border
                   ${trait.rarity === 'legendary' ? 'border-yellow-500/50 bg-yellow-500/5' :
-                    trait.rarity === 'rare' ? 'border-red-900/50 bg-red-900/5' :
+                    trait.rarity === 'rare' ? 'border-orange-400/50 bg-orange-50/80' :
                     trait.rarity === 'uncommon' ? 'border-blue-500/50 bg-blue-500/5' :
                     'border-border bg-muted/30'}
                 `}
@@ -53,7 +53,7 @@ export default function TraitCollection() {
                       <span className={`
                         text-xs px-1.5 py-0.5 rounded-full
                         ${trait.rarity === 'legendary' ? 'bg-yellow-500/20 text-yellow-400' :
-                          trait.rarity === 'rare' ? 'bg-red-900/20 text-red-900' :
+                          trait.rarity === 'rare' ? 'bg-orange-100/80 text-orange-700' :
                           trait.rarity === 'uncommon' ? 'bg-blue-500/20 text-blue-400' :
                           'bg-gray-500/20 text-gray-400'}
                       `}>

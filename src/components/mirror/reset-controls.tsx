@@ -28,7 +28,7 @@ export default function ResetControls() {
   return (
     <div className="mt-6 flex flex-col sm:flex-row gap-4 items-center justify-center">
       <button 
-        className="flex items-center gap-2 px-4 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-md transition-colors"
+        className="flex items-center gap-2 px-4 py-2 text-sm bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 rounded-md transition-colors"
         type="button" 
         onClick={handleLogout}
       >

@@ -148,10 +148,10 @@ export function TwitterConnect({ onConnect }: TwitterConnectProps) {
 
       {/* OAuth Error Troubleshooting */}
       {showTroubleshooting && !rateLimitError && (
-        <div className="bg-red-50/80 p-4 rounded-lg border border-red-200 space-y-3">
+        <div className="bg-orange-50/80 p-4 rounded-lg border border-orange-200 space-y-3">
           <div className="flex items-start space-x-2">
-            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-            <div className="text-sm text-red-800">
+                          <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+              <div className="text-sm text-orange-700">
               <div className="font-medium mb-2">Twitter OAuth Error Detected</div>
               <p className="mb-3">
                 The &quot;Something went wrong&quot; error usually means your Twitter app configuration needs to be fixed.

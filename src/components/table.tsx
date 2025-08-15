@@ -74,7 +74,7 @@ export default function TableDemo() {
   }
 
   if (isError) {
-    return <div className="p-4 text-red-500">Error: {error?.message}</div>;
+    return <div className="p-4 text-orange-600">Error: {error?.message}</div>;
   }
 
   return (
@@ -130,7 +130,7 @@ export default function TableDemo() {
                     onClick={() => setShowFlaggedYappers(!showFlaggedYappers)}
                     className={`w-4 h-4 transition-colors duration-200 ${
                       showFlaggedYappers
-                        ? "text-red-500 opacity-100"
+                        ? "text-orange-500 opacity-100"
                         : "text-[#48333D] opacity-60 hover:opacity-100"
                     }`}
                     fill="none"
@@ -181,7 +181,7 @@ export default function TableDemo() {
                     <div className="flex justify-center items-center w-full h-full">
                       <div className="relative">
                         <button
-                          className="group relative flex items-center justify-center px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/20 shadow-none opacity-70 hover:opacity-100 hover:bg-gradient-to-r hover:from-red-500/20 hover:to-red-600/20 hover:shadow-[0_0_12px_2px_rgba(239,68,68,0.25)] transition-all duration-300 font-medium text-red-500/80 hover:text-red-500 text-sm tracking-wide"
+                          className="group relative flex items-center justify-center px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-500/20 shadow-none opacity-70 hover:opacity-100 hover:bg-gradient-to-r hover:from-orange-500/20 hover:to-orange-600/20 hover:shadow-[0_0_12px_2px_rgba(249,115,22,0.25)] transition-all duration-300 font-medium text-orange-500/80 hover:text-orange-500 text-sm tracking-wide"
                           style={{ minWidth: 80 }}
                           onClick={() => {
                             const url = `https://songjam.space/flags?userId=${entry.userId}`;
@@ -205,11 +205,11 @@ export default function TableDemo() {
                             </svg>
                             <span>Flag</span>
                           </span>
-                          <span className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-red-500/10 transition-colors duration-300 blur-sm" />
+                          <span className="absolute inset-0 rounded-full bg-white/0 group-hover:bg-orange-500/10 transition-colors duration-300 blur-sm" />
                           {!!entry.flagCount &&
                             entry.flagCount > 0 &&
                             entry.botScore > 80 && (
-                              <div className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-red-500/60 text-white text-[10px] font-bold border-2 border-white/60 shadow-sm opacity-70 group-hover:opacity-100 group-hover:bg-red-500 group-hover:border-white group-hover:shadow-[0_0_8px_2px_rgba(239,68,68,0.4)] transition-all duration-300 z-10">
+                              <div className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-orange-500/60 text-white text-[10px] font-bold border-2 border-white/60 shadow-sm opacity-70 group-hover:opacity-100 group-hover:bg-orange-500 group-hover:border-white group-hover:shadow-[0_0_8px_2px_rgba(249,115,22,0.4)] transition-all duration-300 z-10">
                                 {entry.flagCount}
                               </div>
                             )}

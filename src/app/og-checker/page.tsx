@@ -113,9 +113,9 @@ export default function ProfilePage() {
       {/* Error Message */}
       {authError && (
         <div className="max-w-6xl mx-auto px-4 mt-8">
-          <div className="relative p-4 bg-red-100/20 border border-red-200/30 rounded-lg">
+          <div className="relative p-4 bg-orange-100/20 border border-orange-200/30 rounded-lg">
             <div className="flex items-start space-x-3 text-[#48333D]">
-              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-red-600" />
+                              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-orange-600" />
               <div>
                 <div className="font-medium mb-1">Authentication Error</div>
                 <div className="text-sm">{authError}</div>
@@ -123,7 +123,7 @@ export default function ProfilePage() {
                   onClick={() => setAuthError("")}
                   size="sm"
                   variant="outline"
-                  className="mt-2 border-red-300 text-red-700 hover:bg-red-100/20"
+                  className="mt-2 border-orange-300 text-orange-700 hover:bg-orange-100/20"
                 >
                   Dismiss
                 </Button>
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                         Verified - Add Wallet to Complete
                       </div>
                     ) : (
-                      <div className="p-2 bg-red-100/20 rounded text-red-800 border border-red-200/30">
+                      <div className="p-2 bg-orange-100/20 rounded text-orange-700 border border-orange-200/30">
                         {twitterHandle ? "Not verified as OG" : "Awaiting verification"}
                       </div>
                     )}

@@ -17,9 +17,9 @@ export default function OGStatusBadge({ status, label, className }: OGStatusBadg
     },
     error: {
       icon: X,
-      bgColor: "bg-red-100",
-      textColor: "text-red-700",
-      borderColor: "border-red-200",
+          bgColor: "bg-orange-100",
+    textColor: "text-orange-700",
+    borderColor: "border-orange-200",
     },
     warning: {
       icon: AlertCircle,

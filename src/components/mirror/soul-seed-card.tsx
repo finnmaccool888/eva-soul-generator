@@ -20,13 +20,13 @@ export default function SoulSeedCard({ seed }: { seed: SoulSeed }) {
         <span>Level {seed.level}</span>
         <span>Streak {seed.streakCount}d</span>
         {seed.profile && (
-          <span className={seed.trustPenalty ? "text-red-500" : ""}>
+          <span className={seed.trustPenalty ? "text-orange-500" : ""}>
             Trust {trustScore}%
           </span>
         )}
       </div>
       {seed.offensiveCount && seed.offensiveCount > 0 && (
-        <div className="mt-2 text-xs text-red-500">
+        <div className="mt-2 text-xs text-orange-500">
           ⚠️ {seed.offensiveCount} offensive response{seed.offensiveCount > 1 ? "s" : ""} detected
         </div>
       )}

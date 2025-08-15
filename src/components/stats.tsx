@@ -104,7 +104,7 @@ export default function Stats() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-bold">Early Multiplier</h2>
-          <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full border border-red-200">
+          <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full border border-orange-200">
             Expired
           </span>
         </div>

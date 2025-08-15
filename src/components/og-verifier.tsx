@@ -64,8 +64,8 @@ export function OGVerifier({ twitterHandle, onVerification }: OGVerifierProps) {
           </>
         ) : (
           <>
-            <XCircle className="w-5 h-5 text-red-600" />
-            <span className="text-red-800 font-medium">❌ Not found in OG list</span>
+                    <XCircle className="w-5 h-5 text-orange-600" />
+        <span className="text-orange-700 font-medium">❌ Not found in OG list</span>
           </>
         )}
       </div>
@@ -87,8 +87,8 @@ export function OGVerifier({ twitterHandle, onVerification }: OGVerifierProps) {
       )}
 
       {!verificationResult.isVerified && (
-        <div className="p-3 bg-red-100/80 rounded-lg border border-red-200">
-          <p className="text-red-800 text-sm">
+              <div className="p-3 bg-orange-100/80 rounded-lg border border-orange-200">
+        <p className="text-orange-700 text-sm">
             Your Twitter handle was not found in our OG list. Only early supporters who tweeted about Eva Online are
             eligible for OG status.
           </p>

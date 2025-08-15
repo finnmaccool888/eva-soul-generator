@@ -143,7 +143,8 @@ export default function MirrorApp() {
       }
       
       // Check if user is OG and hasn't seen the popup yet
-      if (auth.ogPointsAwarded && !ogPopupShown) {
+      const updatedProfile = loadProfile(); // Reload profile after potential updates
+      if (updatedProfile?.ogPointsAwarded && !ogPopupShown) {
         setShowOGPopup(true);
         setOgPopupShown(true);
         // Save that we've shown the OG popup
@@ -219,7 +220,7 @@ export default function MirrorApp() {
         <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
           <div className="text-center space-y-4 max-w-sm">
             <div className="space-y-2">
-              <p className="text-lg font-semibold text-red-500">Authentication Failed</p>
+              <p className="text-lg font-semibold text-orange-600">Authentication Failed</p>
               <p className="text-sm text-muted-foreground">{errorMessage}</p>
             </div>
             <button 
