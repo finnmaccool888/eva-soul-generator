@@ -35,7 +35,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
             onClick={onClose}
           >
             <div
-              className="relative max-w-lg w-full bg-gradient-to-br from-purple-900/90 to-pink-900/90 rounded-2xl border border-purple-500/50 shadow-2xl overflow-hidden"
+              className="relative max-w-lg w-full bg-gradient-to-br from-red-900/90 to-pink-900/90 rounded-2xl border border-red-900/50 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
@@ -60,7 +60,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
                   }}
                   className="absolute top-4 left-4"
                 >
-                  <Sparkles className="h-8 w-8 text-purple-400" />
+                  <Sparkles className="h-8 w-8 text-red-900" />
                 </motion.div>
                 <motion.div
                   animate={{
@@ -87,7 +87,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
                     <img
                       src={OG_IMAGE_URL}
                       alt="EVA OG Badge"
-                      className="w-48 h-48 mx-auto rounded-full border-4 border-purple-400 shadow-lg"
+                      className="w-48 h-48 mx-auto rounded-full border-4 border-red-900 shadow-lg"
                     />
                     <motion.div
                       animate={{
@@ -97,7 +97,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
                         duration: 2,
                         repeat: Infinity,
                       }}
-                      className="absolute inset-0 rounded-full border-4 border-purple-400/50"
+                      className="absolute inset-0 rounded-full border-4 border-red-900/50"
                     />
                   </motion.div>
                   
@@ -116,7 +116,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="text-xl text-purple-200"
+                      className="text-xl text-red-800"
                     >
                       {OG_MESSAGE}
                     </motion.p>
@@ -127,10 +127,10 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.5, type: "spring" }}
-                    className="bg-purple-400/20 rounded-lg p-4 border border-purple-400/50"
+                    className="bg-red-900/20 rounded-lg p-4 border border-red-900/50"
                   >
-                    <div className="text-purple-300 text-sm mb-1">OG BONUS AWARDED</div>
-                    <div className="text-4xl font-bold text-purple-400">
+                    <div className="text-red-800 text-sm mb-1">OG BONUS AWARDED</div>
+                    <div className="text-4xl font-bold text-red-900">
                       +{OG_POINTS.toLocaleString()} Points
                     </div>
                   </motion.div>
@@ -141,7 +141,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
                     onClick={onClose}
-                    className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105"
+                    className="px-8 py-3 bg-gradient-to-r from-red-800 to-red-600 text-white font-medium rounded-lg hover:from-red-900 hover:to-red-700 transition-all transform hover:scale-105"
                   >
                     Continue to EVA
                   </motion.button>
@@ -150,7 +150,7 @@ export default function OGPopup({ isOpen, onClose, username }: OGPopupProps) {
               
               {/* Background decoration */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-red-900/20 rounded-full blur-3xl" />
                 <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl" />
               </div>
             </div>

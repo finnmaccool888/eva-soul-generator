@@ -40,7 +40,7 @@ export default function TraitCollection() {
                 className={`
                   rounded-lg p-3 border
                   ${trait.rarity === 'legendary' ? 'border-yellow-500/50 bg-yellow-500/5' :
-                    trait.rarity === 'rare' ? 'border-purple-500/50 bg-purple-500/5' :
+                    trait.rarity === 'rare' ? 'border-red-900/50 bg-red-900/5' :
                     trait.rarity === 'uncommon' ? 'border-blue-500/50 bg-blue-500/5' :
                     'border-border bg-muted/30'}
                 `}
@@ -53,7 +53,7 @@ export default function TraitCollection() {
                       <span className={`
                         text-xs px-1.5 py-0.5 rounded-full
                         ${trait.rarity === 'legendary' ? 'bg-yellow-500/20 text-yellow-400' :
-                          trait.rarity === 'rare' ? 'bg-purple-500/20 text-purple-400' :
+                          trait.rarity === 'rare' ? 'bg-red-900/20 text-red-900' :
                           trait.rarity === 'uncommon' ? 'bg-blue-500/20 text-blue-400' :
                           'bg-gray-500/20 text-gray-400'}
                       `}>
@@ -70,7 +70,7 @@ export default function TraitCollection() {
                       <div className="flex items-center gap-1">
                         <div className="w-16 h-1 bg-muted rounded-full overflow-hidden">
                           <motion.div
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                            className="h-full bg-gradient-to-r from-red-900 to-pink-500"
                             initial={{ width: 0 }}
                             animate={{ width: `${earned.strength}%` }}
                             transition={{ delay: idx * 0.1 + 0.3 }}

@@ -395,7 +395,7 @@ export default function EvaTransmission() {
           </div>
           <div className="w-full bg-muted h-1 rounded-full overflow-hidden">
             <motion.div 
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-full"
+              className="bg-gradient-to-r from-red-900 to-pink-500 h-full"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.5 }}
@@ -433,7 +433,7 @@ export default function EvaTransmission() {
               />
             </div>
 
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-red-800 to-red-600 bg-clip-text text-transparent">
               {userVibe === "ethereal" && `Greetings, ${userAlias}`}
               {userVibe === "zen" && `Welcome, ${userAlias}`}
               {userVibe === "cyber" && `Connection established, ${userAlias}`}
@@ -453,7 +453,7 @@ export default function EvaTransmission() {
                   <motion.p 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-purple-400 italic"
+                    className="text-sm text-red-900 italic"
                   >
                     {reaction}
                   </motion.p>
@@ -540,7 +540,7 @@ export default function EvaTransmission() {
                 className="w-full h-full rounded-full"
               />
               <motion.div
-                className="absolute inset-0 rounded-full border-4 border-purple-500/20"
+                className="absolute inset-0 rounded-full border-4 border-red-900/20"
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.5, 0, 0.5],
@@ -573,7 +573,7 @@ export default function EvaTransmission() {
                   className="w-12 h-12 rounded-full"
                 />
                 {React.createElement(moodIcons[evaReaction.mood], {
-                  className: "w-5 h-5 absolute -bottom-1 -right-1 bg-background rounded-full p-1 text-purple-400",
+                  className: "w-5 h-5 absolute -bottom-1 -right-1 bg-background rounded-full p-1 text-red-900",
                 })}
               </div>
               
@@ -590,19 +590,19 @@ export default function EvaTransmission() {
                     className="space-y-2"
                   >
                     {unlockedTrait && (
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-900/20 to-pink-500/20 text-red-900 border border-red-900/30">
                         <span className="text-lg">{unlockedTrait.icon}</span>
                         <div>
                           <div className="font-medium">{unlockedTrait.name}</div>
                           <div className="text-xs opacity-80">{unlockedTrait.description}</div>
                         </div>
-                        <span className="text-xs bg-purple-500/20 px-2 py-1 rounded-full">
+                        <span className="text-xs bg-red-900/20 px-2 py-1 rounded-full">
                           {unlockedTrait.hashtag}
                         </span>
                       </div>
                     )}
                     {evaReaction.unlock && !unlockedTrait && (
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-sm">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-900/10 text-red-900 text-sm">
                         <Sparkles className="w-4 h-4" />
                         Trait unlocked: {evaReaction.unlock}
                       </div>
@@ -678,7 +678,7 @@ export default function EvaTransmission() {
               <div className="space-y-4 max-w-md mx-auto">
                 {/* Human Score Card */}
                 <motion.div 
-                  className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg p-6 border border-purple-500/30"
+                  className="bg-gradient-to-br from-red-900/20 to-pink-500/20 rounded-lg p-6 border border-red-900/30"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
@@ -686,18 +686,18 @@ export default function EvaTransmission() {
                   <h3 className="text-lg font-semibold mb-3">Humanity Assessment</h3>
                   
                   <div className="flex items-center justify-center gap-4 mb-4">
-                    <div className="text-4xl sm:text-5xl font-bold text-purple-400">
+                    <div className="text-4xl sm:text-5xl font-bold text-red-900">
                       {humanScore}
                     </div>
                     <div className="text-left">
                       <div className="text-sm text-muted-foreground">Human Score</div>
-                      <div className="text-2xl font-bold text-purple-400">Grade: {grade}</div>
+                      <div className="text-2xl font-bold text-red-900">Grade: {grade}</div>
                     </div>
                   </div>
                   
                   <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
                     <p>Based on response depth, authenticity, and engagement</p>
-                    <p className="text-purple-300">
+                    <p className="text-red-800">
                       {humanScore >= 80 && "Exceptional human qualities detected!"}
                       {humanScore >= 60 && humanScore < 80 && "Strong human consciousness patterns"}
                       {humanScore >= 40 && humanScore < 60 && "Developing human traits observed"}
@@ -729,7 +729,7 @@ export default function EvaTransmission() {
                   <div className="border-t pt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-muted-foreground">Average Human Score (FICO-like)</span>
-                      <span className="font-bold text-purple-400">{humanScore}/100</span>
+                      <span className="font-bold text-red-900">{humanScore}/100</span>
                     </div>
                   </div>
                   

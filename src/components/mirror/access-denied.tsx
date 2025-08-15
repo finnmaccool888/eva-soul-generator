@@ -32,7 +32,7 @@ export default function AccessDenied({ username }: AccessDeniedProps) {
           }}
           className="inline-block"
         >
-          <Lock className="h-20 w-20 text-purple-400 mx-auto" />
+          <Lock className="h-20 w-20 text-red-900 mx-auto" />
         </motion.div>
         
         <div className="space-y-4">
@@ -42,8 +42,8 @@ export default function AccessDenied({ username }: AccessDeniedProps) {
             Sorry @{username}, EVA's Mirror is currently in exclusive beta.
           </p>
           
-          <div className="bg-purple-900/20 rounded-lg p-4 border border-purple-500/30">
-            <p className="text-purple-300">
+          <div className="bg-red-900/20 rounded-lg p-4 border border-red-900/30">
+            <p className="text-red-800">
               This experience is limited to OG community members during the initial phase.
             </p>
           </div>
@@ -56,7 +56,7 @@ export default function AccessDenied({ username }: AccessDeniedProps) {
         <div className="pt-4">
           <button
             onClick={handleLogout}
-            className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            className="px-6 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg transition-colors"
           >
             Sign Out
           </button>

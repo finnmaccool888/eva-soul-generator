@@ -110,7 +110,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="text-xs sm:text-sm text-purple-400 italic flex items-center gap-2"
+                      className="text-xs sm:text-sm text-red-900 italic flex items-center gap-2"
                     >
                       <span className="animate-pulse">✨</span>
                       {playfulComment}
