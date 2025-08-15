@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { pickDaily } from "@/lib/mirror/prompts";
+import { getOnboardingQuestions, MirrorQuestion } from "@/lib/mirror/questions";
 import { defaultSeed, saveSeed, loadSeed, feedSeed } from "@/lib/mirror/seed";
 import { writeJson, StorageKeys } from "@/lib/mirror/storage";
 import PrimaryButton from "@/components/primary-button";
@@ -13,7 +13,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
   const [alias, setAlias] = useState("");
   const [vibe, setVibe] = useState<"ethereal" | "zen" | "cyber">("ethereal");
   const [step, setStep] = useState<"intro" | "prompts" | "finish">("intro");
-  const prompts = useMemo(() => pickDaily(3), []);
+  const prompts = useMemo(() => getOnboardingQuestions(), []);
   const [answers, setAnswers] = useState<string[]>(["", "", ""]);
 
   const answeredCount = answers.filter((a) => a.trim().length > 0).length;
@@ -126,7 +126,7 @@ export default function Onboarding({ onDone }: { onDone: () => void }) {
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
-              {prompts.map((p, idx) => (
+              {prompts.map((p: MirrorQuestion, idx: number) => (
                 <div key={p.id} className="rounded-md border border-border p-3 bg-muted text-muted-foreground">
                   <div className="text-sm opacity-70">Eva asks</div>
                   <div className="text-sm font-medium">{p.text}</div>

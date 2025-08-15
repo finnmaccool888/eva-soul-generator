@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import DailyTransmission from "@/components/mirror/daily-transmission";
+import EvaTransmission from "@/components/mirror/eva-transmission";
 import { track } from "@/lib/mirror/analytics";
 import Onboarding from "@/components/mirror/onboarding";
 import OnboardingWizard from "@/components/mirror/onboarding-wizard";
@@ -53,7 +53,7 @@ export default function MirrorPage() {
         <h1 className="mb-3 text-2xl font-semibold text-foreground">Eva&apos;s Mirror</h1>
         <p className="mb-4 text-sm opacity-80 text-foreground">Feed your Soul Seed a little every day. Small truths, big changes.</p>
         {!onboarded && <Onboarding onDone={handleOnboardingComplete} />}
-        {onboarded && <DailyTransmission />}
+        {onboarded && <EvaTransmission />}
         <ResetControls />
       </main>
     </>
